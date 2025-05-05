@@ -275,7 +275,6 @@ public class TripRepository : ITripRepository
         await using var con = new SqlConnection(_connectionString);
         await con.OpenAsync(token);
 
-        // Начинаем транзакцию
         await using var transaction = await con.BeginTransactionAsync(token);
         try
         {
@@ -290,14 +289,12 @@ public class TripRepository : ITripRepository
 
             var rowsAffected = await deleteCmd.ExecuteNonQueryAsync(token);
 
-            // Подтверждаем транзакцию
             await transaction.CommitAsync(token);
 
             return rowsAffected > 0;
         }
         catch
         {
-            // В случае ошибки откатываем транзакцию
             await transaction.RollbackAsync(token);
             throw;
         }
